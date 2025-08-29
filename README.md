@@ -34,7 +34,7 @@
 
 Имея чистый Docker volume и запущенный Postgres, выполни скрипт:
 
-        ./scripts/gendata.sh
+    ./scripts/gendata.sh
 
 ## Ссылки
 

@@ -4,7 +4,7 @@ set -e
 
 # Создать схему.
 docker compose exec postgres \
-    psql -U postgres -f /benchmarks/tpc-h/dss.ddl
+    psql -U postgres -f /benchmarks/tpc-h/schema.sql
 
 # Сгенерировать данные (scale factor 1GB).
 uv run tpchgen-cli --scale-factor 1 --format csv --output-dir=./data/tpc-h
