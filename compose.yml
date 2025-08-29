@@ -1,0 +1,19 @@
+name: xxplain
+
+services:
+  postgres:
+    image: postgres:15.14-bookworm
+    env_file: .env.postgres
+    command: ['-c', 'config_file=/etc/postgresql/postgresql.conf']
+    ports:
+      # Для удобства локального тестирования.
+      - 127.0.0.1:5432:5432
+    volumes:
+      - xxplain-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+
+volumes:
+  xxplain-postgres-data:
+    # Ручное управление созданием и удалением volume.
+    external: true
