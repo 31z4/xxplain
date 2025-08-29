@@ -6,12 +6,14 @@ services:
     env_file: .env.postgres
     command: ['-c', 'config_file=/etc/postgresql/postgresql.conf']
     ports:
-      # Для удобства локального тестирования.
+      # Для удобства локальной разработки.
       - 127.0.0.1:5432:5432
     volumes:
       - xxplain-postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
       - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./benchmarks:/benchmarks:ro
+      - ./data:/data:ro
 
 volumes:
   xxplain-postgres-data:

@@ -1,0 +1,39 @@
+version = 1
+revision = 3
+requires-python = ">=3.13"
+
+[[package]]
+name = "tpchgen-cli"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/d7/d3a2260cf596f5aa0c039137652a843ae9bb082cae688529192f2a5abd36/tpchgen_cli-2.0.0.tar.gz", hash = "sha256:d1b9d9bd478b63038eb30700b654131be6965a2b3d270a2d06830b6448806e82", size = 3435404, upload-time = "2025-08-29T02:51:04.322Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/e9/d305ba665de610c06227288602f79151e8f921a1f9c3b6ec676f8c277449/tpchgen_cli-2.0.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:35e212d76e3a0e4956bdf3bd7460ac0747dbb573922e0b07a65fd5d1a1741d8e", size = 5167188, upload-time = "2025-08-29T02:50:53.657Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/3f/d8eeae7154a0953f30786b1bdec6bfdc3b183c6d49a9d3f86c78020dfd0e/tpchgen_cli-2.0.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:15b7541006fa402a43703cfc1130da5cec135e14644fe219fbf3cf9be198ea48", size = 4732536, upload-time = "2025-08-29T02:50:51.59Z" },
+    { url = "https://files.pythonhosted.org/packages/74/62/a80598326b99536fb13f405a113db3462d10ed3e8355bd50348d355a1d8a/tpchgen_cli-2.0.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:87f4a76f8aca20685061dcb0553d8c888b6ea7e9b0bd5441cd6fea24463744a4", size = 5217427, upload-time = "2025-08-29T02:50:41.339Z" },
+    { url = "https://files.pythonhosted.org/packages/61/9e/65b84edb0de51c2189d45ec0ce178c5ef6415d17205e33edefcfa59bd402/tpchgen_cli-2.0.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:e59d403c26fc59cdb6a2739bae234a72de1d0167e5f9bcd501f08625c68f22dc", size = 5468818, upload-time = "2025-08-29T02:50:43.453Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/5d/a54af5adf91b70a8ce283e1fcf70af9ffd170518fe7f43884634cdfbda41/tpchgen_cli-2.0.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:648f27fdc72f2a134a24f3fa582f6f77c8eb41f7cde31451d3fa995d3c06101e", size = 5978759, upload-time = "2025-08-29T02:50:47.435Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/8b/8e3f7b61d946575d8bc4f0debbf678fd72edd9b974b691ddeb754d8dd0e9/tpchgen_cli-2.0.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:a8eab4e9b87992afb4ab65d6b72392bcafaedfa71733dd11a0f4d57d0062d0ef", size = 6759067, upload-time = "2025-08-29T02:50:45.628Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/e9/921fa667230819a8190d387889deae3d650f61cd8b84b589d955a72e61d2/tpchgen_cli-2.0.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:48c46cae63e632b09a3daa37ad58d87d86879741c5e5a35c7bf7c6463d2ed11a", size = 5510846, upload-time = "2025-08-29T02:50:49.832Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/e2/003579a11fe4e81a4fc7165578dc393e97b4ce03489c229d4c5cdfa30cb5/tpchgen_cli-2.0.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:78f576eeb49d406eba2e821531afd182a44134b05237c5ba97b1c4dc12587097", size = 5122729, upload-time = "2025-08-29T02:50:55.733Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/ab/0b88da6168037c2e5d23d6635db53c772f4925f7898a25898a99e4dcafb3/tpchgen_cli-2.0.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:c6c21b15d09a7d0473343de7fc73ba1f195d000c4f0c638fc47917c170649f27", size = 5482994, upload-time = "2025-08-29T02:50:57.775Z" },
+    { url = "https://files.pythonhosted.org/packages/43/76/df5355f293b62350dd3cefc454e5ee75d25ff4edb4ad6eedc12bc1f7aa6c/tpchgen_cli-2.0.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:3b16db8cd824f5c13c9216a3775854a45d5fa7f5cd1be1d17910a3cdec3b5965", size = 5695149, upload-time = "2025-08-29T02:50:59.847Z" },
+    { url = "https://files.pythonhosted.org/packages/14/81/7bb20b0a5d0d020e50b53333878c5ebf68037880eaaa137e7c8e1cb5983d/tpchgen_cli-2.0.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:b16433520c238474197c1653db1122e99d9c4690e7374244fcadf9db43968965", size = 5583543, upload-time = "2025-08-29T02:51:02.307Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/fe/8609b0144dde0360c7d4c506fe203e1fdb6b4ebdd0a5c569a842e52ac4b5/tpchgen_cli-2.0.0-py3-none-win32.whl", hash = "sha256:9ada7611dd49e350be265ad147c21a37f14e7e3babc24c79a277ce721a7f017a", size = 4264943, upload-time = "2025-08-29T02:51:08.498Z" },
+    { url = "https://files.pythonhosted.org/packages/98/0f/ca2cda050c5c27347ac950261715ede1815944b40bc0e440e5da7b6312c7/tpchgen_cli-2.0.0-py3-none-win_amd64.whl", hash = "sha256:58e262e3f115d4103ee5ce216ee70304bdeeb1e53c8314be77c824e48df15327", size = 4679096, upload-time = "2025-08-29T02:51:06.673Z" },
+]
+
+[[package]]
+name = "xxplane"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "tpchgen-cli" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "tpchgen-cli", specifier = ">=2.0.0" }]

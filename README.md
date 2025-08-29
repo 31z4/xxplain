@@ -11,7 +11,12 @@
 
 ## Подготовка окружения
 
-Для работы потребуется [Docker Compose](https://docs.docker.com/compose/).
+Для работы потребуется:
+
+* [Docker Compose](https://docs.docker.com/compose/)
+* [uv](https://docs.astral.sh/uv/)
+
+Следуй официальным инструкциям по установке.
 
 1. Создай пароль суперпользователя Postgres.
 
@@ -24,3 +29,27 @@
 3. Все готово для запуска 🚀
 
         docker compose up
+
+### Подготовка синтетических данных
+
+Имея чистый Docker volume и запущенный Postgres, выполни скрипт:
+
+        ./scripts/gendata.sh
+
+## Ссылки
+
+**Инструменты**
+
+* [pganalyze](https://pganalyze.com)
+* [PostgreSQL Workload Analyzer](https://github.com/powa-team/powa)
+
+**Бенчмарки и данные**
+
+* [The CTU Prague Relational Learning Repository](https://relational.fel.cvut.cz)
+* [DSB Benchmark](https://github.com/microsoft/dsb)
+* [A Benchmark for Real-Time Analytics Applications](https://github.com/timescale/rtabench)
+* [TPC-DS benchmark kit with some modifications/fixes](https://github.com/gregrahn/tpcds-kit)
+
+**Модели**
+
+* [Zero-Shot Cost Estimation Models](https://github.com/DataManagementLab/zero-shot-cost-estimation)
