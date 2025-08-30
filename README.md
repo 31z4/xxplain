@@ -18,17 +18,27 @@
 
 Следуй официальным инструкциям по установке.
 
-1. Создай пароль суперпользователя Postgres.
+1. Создай пароль суперпользователя и `xxplain` для Postgres.
 
-        echo 'POSTGRES_PASSWORD=secret' > .env.postgres
+    ```shell
+    $ cat << EOF > .env.postgres
+    POSTGRES_PASSWORD=super-secret
+    POSTGRES_XXPLAIN_PASSWORD=top-secret
+    EOF
+    ```
 
-2. Создай чистый Docker volume для Postgres.
+2. Укажи, как сервис будет подключаться к Postgres:
+
+        echo 'POSTGRES_DSN=postgresql://xxplain:top-secret@localhost/postgres' > .env.backend
+
+3. Создай чистый Docker volume для Postgres.
 
         make clean-docker-volumes
 
-3. Все готово для запуска 🚀
+4. Все готово для запуска 🚀
 
         docker compose up
+        make backend-run
 
 ### Подготовка синтетических данных
 

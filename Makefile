@@ -1,11 +1,11 @@
 backend-run:
-	python -m backend.main
+	uv run python -m backend.main
 
 backend-lint-check:
-	ruff check backend
+	uv run ruff check backend
 
 backend-format-check:
-	ruff format --check backend
+	uv run ruff format --check backend
 
 pg-stat-statements-reset:
 	docker compose exec postgres \
