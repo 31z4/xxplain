@@ -12,5 +12,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.12.11",
+    "dotenv>=0.9.9",
+    "lightgbm>=4.6.0",
+    "numpy>=2.3.2",
+    "pandas>=2.3.2",
+    "psycopg2-binary>=2.9.10",
+    "scikit-learn>=1.7.1",
     "tpchgen-cli>=2.0.0",
 ]
