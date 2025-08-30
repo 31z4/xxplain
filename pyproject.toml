@@ -2,9 +2,15 @@
 name = "xxplane"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi>=0.116.1",
+    "psycopg[binary]>=3.2.9",
+    "structlog>=25.4.0",
+    "uvicorn>=0.35.0",
+]
 
 [dependency-groups]
 dev = [
+    "ruff>=0.12.11",
     "tpchgen-cli>=2.0.0",
 ]

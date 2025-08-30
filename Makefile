@@ -1,3 +1,12 @@
+backend-run:
+	python -m backend.main
+
+backend-lint-check:
+	ruff check backend
+
+backend-format-check:
+	ruff format --check backend
+
 pg-stat-statements-reset:
 	docker compose exec postgres \
         psql -U postgres -c "SELECT pg_stat_statements_reset()"
