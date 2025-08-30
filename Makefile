@@ -1,3 +1,7 @@
+pg-stat-statements-reset:
+	docker compose exec postgres \
+        psql -U postgres -c "SELECT pg_stat_statements_reset()"
+
 docker-compose-validate:
 	docker compose config -q
 

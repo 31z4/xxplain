@@ -42,6 +42,8 @@
 
 * [pganalyze](https://pganalyze.com)
 * [PostgreSQL Workload Analyzer](https://github.com/powa-team/powa)
+* [pgMustard](https://www.pgmustard.com)
+* [FlameExplain](https://flame-explain.com)
 
 **Бенчмарки и данные**
 
@@ -53,3 +55,4 @@
 **Модели**
 
 * [Zero-Shot Cost Estimation Models](https://github.com/DataManagementLab/zero-shot-cost-estimation)
+* [LLM for Index Recommendation](https://github.com/XinxinZhao798/LLMIndexAdvisor)
