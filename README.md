@@ -48,9 +48,16 @@
 
 ## Сбор данных для обучения моделей
 
-    uv run uv run lab/build_datasets.py
+    uv run lab/build_datasets.py
 
 Файлы соберутся в `lab/train.csv` и `lab/test.csv`. В репозиторий положил в zip
+
+Проверка работы линейной регрессии на фичах, собранных в train.csv - в файле `linreg_model.py`.
+Запуск линейной регрессии:
+
+    uv run lab/linreg_model.py
+
+Предсказания должна сохранить в `lab/test_with_pred.csv`
 
 ## Ссылки
 
