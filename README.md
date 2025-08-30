@@ -52,12 +52,13 @@
 
 Файлы соберутся в `lab/train.csv` и `lab/test.csv`. В репозиторий положил в zip
 
-Проверка работы линейной регрессии на фичах, собранных в train.csv - в файле `linreg_model.py`.
-Запуск линейной регрессии:
+Проверка работы разных моделей на фичах, собранных в train.csv - в файле `predict_model.py`.
+Запуск сравнения моделей:
 
-    uv run lab/linreg_model.py
+    uv run lab/predict_model.py
 
-Предсказания должна сохранить в `lab/test_with_pred.csv`
+Предсказания будут сохранениы в `lab/test_with_pred_{Model Name}.csv`
+На момент написания из всех моделей лучше всего показала себя GradientBoosting.
 
 ## Ссылки
 
