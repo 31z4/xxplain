@@ -86,6 +86,7 @@ class PredictionService:
         except Exception as e:
             return {
                 "prediction": None,
+                "plan": None,
                 "error": f"Ошибка предсказания: {str(e)}",
                 "status": "error"
             }
