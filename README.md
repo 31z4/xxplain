@@ -46,11 +46,19 @@
 
     ./scripts/gendata.sh
 
-## Сбор данных для обучения моделей
+## Обучение моделей
 
-    uv run uv run lab/build_datasets.py
+```shell
+uv run scripts/build_datasets.py
+uv run scripts/train_models.py
+```
 
-Файлы соберутся в `lab/train.csv` и `lab/test.csv`. В репозиторий положил в zip
+Файлы соберутся в `datasets` и `models` соответственно.
+Проверить работу моделей можно с помощью скрипта к бекенду:
+
+```shell
+uv run scripts/api_usage.py
+```
 
 ## Ссылки
 
