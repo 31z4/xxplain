@@ -5,6 +5,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 
 from .config import settings
+from .predict import predict
 
 app = FastAPI(debug=True)
 
@@ -48,7 +49,13 @@ async def post_explain(request: Request, analyze: bool = False):
         await cur.execute(sql)
         obj = await cur.fetchone()
 
-    return obj
+    plan = obj[0][0]
+    prediction = predict(plan)
+
+    return {
+        "plan": plan,
+        "prediction": prediction,
+    }
 
 
 if __name__ == "__main__":
