@@ -40,7 +40,7 @@
           </div>
           <div class="d-flex align-items-baseline justify-content-end">
             <div class="form-check px-3">
-              <input class="form-check-input" type="checkbox" value="" id="checkDefault">
+              <input class="form-check-input" type="checkbox" value="" id="checkDefault" v-model="analyze_on">
               <label class="form-check-label" for="checkDefault">
                 Analyze
               </label>
@@ -55,6 +55,7 @@
       <div class="col col-6">
         <form class="d-flex flex-column">
           <div class="mb-3" v-if="prediction">
+            <h2>Текущий запрос</h2>
             <table class="table">
               <thead>
                 <tr>
@@ -70,7 +71,8 @@
                   <td><span :class="{
                     'badge text-bg-success': prediction?.cost_class === 0,
                     'badge text-bg-warning': prediction?.cost_class === 1,
-                    'badge text-bg-danger': prediction?.cost_class === 2
+                    'badge text-bg-danger': prediction?.cost_class === 2,
+                    'badge text-bg-danger': prediction?.cost_class === 3
                   }">{{prediction?.cost}}</span></td>
                   <td>
                     <span :class="{
@@ -94,7 +96,8 @@
                   <td><span :class="{
                     'badge text-bg-success': actual?.cost_class === 0,
                     'badge text-bg-warning': actual?.cost_class === 1,
-                    'badge text-bg-danger': actual?.cost_class === 2
+                    'badge text-bg-danger': actual?.cost_class === 2,
+                    'badge text-bg-danger': actual?.cost_class === 3
                   }">{{actual?.cost}}</span></td>
                   <td>
                     <span :class="{
@@ -117,172 +120,198 @@
             </table>
           </div>
           <div class="mb-3" v-if="prediction">
-            <a class="btn" data-bs-toggle="collapse" href="#collapse-plan" role="button" aria-expanded="false"
-              aria-controls="collapse-plan">
-              🫣 Посмотреть план
-            </a>
-            <div class="collapse" id="collapse-plan">
-              <div class="card card-body" data-bs-theme="light">
-                <pev2 :plan-source="plan" :plan-query="sql"></pev2>
+            <div class="accordion" id="accordionExample">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-plan" aria-expanded="true" aria-controls="collapse-plan">
+                    Посмотреть план
+                  </button>
+                </h2>
+                <div id="collapse-plan" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                    <pev2 :plan-source="plan" :plan-query="sql"></pev2>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div class="mb-3" v-if="recommendation">
-            <div class="card">
-              <div class="border-bottom d-flex">
-                <button type="button" class="btn">✨ Рекомендации</button>
-                <div class="flex-fill"></div>
-                <button type="button" class="btn btn-clipboard" data-bs-toggle="tooltip" data-bs-placement="top"
-                  data-bs-title="Скопировать" @click="copyToClipboard(recommendation.query)">
-                  <div v-if="!copied">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-clipboard" viewBox="0 0 16 16">
-                    <path
-                      d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
-                    <path
-                      d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
-                  </svg>
-                  </div>
-                  <div v-if="copied">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
-                  </svg>
-                  </div>
-                </button>
-                <button type="button" class="btn btn-clipboard" data-bs-toggle="tooltip" data-bs-placement="top"
-                  data-bs-title="Применить" @click="applySQL(recommendation.query)">
-                  <div v-if="!applied">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stars"
-                    viewBox="0 0 16 16">
-                    <path
-                      d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
-                  </svg>
-                  </div>
-                  <div v-if="applied">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
-                  </svg>
-                  </div>
-                </button>
+            <div v-if="recommendation?.query">
+              <h2>Рекомендованный запрос</h2>
+              <div class="card">
+                <div class="border-bottom d-flex">
+                  <button type="button" class="btn">✨ Рекомендации</button>
+                  <div class="flex-fill"></div>
+                  <button type="button" class="btn btn-clipboard" data-bs-toggle="tooltip" data-bs-placement="top"
+                    data-bs-title="Скопировать" @click="copyToClipboard(recommendation.query)">
+                    <div v-if="!copied">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-clipboard" viewBox="0 0 16 16">
+                        <path
+                          d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
+                        <path
+                          d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
+                      </svg>
+                    </div>
+                    <div v-if="copied">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-check" viewBox="0 0 16 16">
+                        <path
+                          d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+                      </svg>
+                    </div>
+                  </button>
+                  <button type="button" class="btn btn-clipboard" data-bs-toggle="tooltip" data-bs-placement="top"
+                    data-bs-title="Применить" @click="applySQL(recommendation.query)">
+                    <div v-if="!applied">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-stars" viewBox="0 0 16 16">
+                        <path
+                          d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
+                      </svg>
+                    </div>
+                    <div v-if="applied">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-check" viewBox="0 0 16 16">
+                        <path
+                          d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+                <div class="card-body">
+                  <code>{{recommendation.query}}</code>
+                </div>
               </div>
-              <div class="card-body">
-                <code>{{recommendation.query}}</code>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Cost</th>
+                    <th scope="col">Total time</th>
+                    <th scope="col">Data read</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Прогноз</th>
+                    <td><span :class="{
+                      'badge text-bg-success': recommendation?.prediction?.cost_class === 0,
+                      'badge text-bg-warning': recommendation?.prediction?.cost_class === 1,
+                      'badge text-bg-danger': recommendation?.prediction?.cost_class === 2,
+                      'badge text-bg-danger': recommendation?.prediction?.cost_class === 3
+                    }">{{recommendation?.prediction?.cost}}</span></td>
+                    <td>
+                      <span :class="{
+                      'badge text-bg-success': recommendation?.prediction?.total_time_class === 0,
+                      'badge text-bg-warning': recommendation?.prediction?.total_time_class === 1,
+                      'badge text-bg-danger': recommendation?.prediction?.total_time_class === 2
+                    }">
+                        {{recommendation?.prediction?.total_time_ms}}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="{
+                      'badge text-bg-success': recommendation?.prediction?.data_read_class === 0,
+                      'badge text-bg-warning': recommendation?.prediction?.data_read_class === 1,
+                      'badge text-bg-danger': recommendation?.prediction?.data_read_class === 2
+                    }">{{recommendation?.prediction?.data_read_bytes}}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="mb-3">
+                <div class="accordion" id="accordionExample">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse-recommendation-plan" aria-expanded="true" aria-controls="collapse-recommendation-plan">
+                        Посмотреть план
+                      </button>
+                    </h2>
+                    <div id="collapse-recommendation-plan" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                      <div class="accordion-body">
+                        <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="sql"></pev2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col">Cost</th>
-                  <th scope="col">Total time</th>
-                  <th scope="col">Data read</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">Прогноз</th>
-                  <td><span :class="{
-                    'badge text-bg-success': recommendation?.prediction?.cost_class === 0,
-                    'badge text-bg-warning': recommendation?.prediction?.cost_class === 1,
-                    'badge text-bg-danger': recommendation?.prediction?.cost_class === 2
-                  }">{{recommendation?.prediction?.cost}}</span></td>
-                  <td>
-                    <span :class="{
-                    'badge text-bg-success': recommendation?.prediction?.total_time_class === 0,
-                    'badge text-bg-warning': recommendation?.prediction?.total_time_class === 1,
-                    'badge text-bg-danger': recommendation?.prediction?.total_time_class === 2
-                  }">
-                      {{recommendation?.prediction?.total_time_ms}}
-                    </span>
-                  </td>
-                  <td>
-                    <span :class="{
-                    'badge text-bg-success': recommendation?.prediction?.data_read_class === 0,
-                    'badge text-bg-warning': recommendation?.prediction?.data_read_class === 1,
-                    'badge text-bg-danger': recommendation?.prediction?.data_read_class === 2
-                  }">{{recommendation?.prediction?.data_read_bytes}}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="mb-3">
-            <a class="btn" data-bs-toggle="collapse" href="#collapse-recommendation-plan" role="button" aria-expanded="false"
-              aria-controls="collapse-recommendation-plan">
-              🫣 Посмотреть план
-            </a>
-            <div class="collapse" id="collapse-recommendation-plan">
-              <div class="card card-body" data-bs-theme="light">
-                <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="sql"></pev2>
-              </div>
-            </div>
-          </div>
+            <h2 v-else style="color: gray">Нет рекомендаций</h2>
           </div>
       </div>
+      <br>
     </div>
-    <br>
-  </div>
 
-  <script>
-    const { createApp } = Vue;
+    <script>
+      const { createApp } = Vue;
 
-    const app = createApp({
-      setup() {
-        return {
-          sql: localStorage.getItem('sql') || ''
-        }
-      },
-      data() {
-        return {
-          sql: '',
-          loading: false,
-          result: null,
-          elapsed: null,
-          copied: false,
-          applied: false
-        };
-      },
-      methods: {
-        async send() {
-          localStorage.setItem('sql', this.sql);
-          this.loading = true;
-          try {
-            const response = await fetch('/explain', {
-              method: 'POST',
-              body: this.sql
-            });
-            const data = await response.json();
-            this.plan = JSON.stringify(data?.plan);
-            this.recommendation = data?.recommendation;
-            this.prediction = data?.prediction;
-          } catch (error) {
-            this.result = { prediction: null, status: 'error', error: error.message };
-          } finally {
-            this.loading = false;
+      const app = createApp({
+        setup() {
+          return {
+            sql: localStorage.getItem('sql') || ''
           }
         },
-        copyToClipboard(text) {
-          navigator.clipboard.writeText(text).then(() => {
-            // Можно добавить визуальную обратную связь, например, изменить значок кнопки или показать уведомление
-          });
-          this.copied = true;
-          setTimeout(() => {
-            this.copied = false;
-          }, 1000)
+        data() {
+          return {
+            // ui state
+            sql: '',
+            loading: false,
+            copied: false,
+            applied: false,
+            analyze_on: false,
+            // data state
+            recommendation: null,
+            prediction: null,
+            actual: null,
+            plan: null
+          };
         },
-        applySQL(text) {
-          this.sql = text;
-          this.applied = true;
-          setTimeout(() => {
-            this.applied = false;
-          }, 1000)
+        methods: {
+          async send() {
+            localStorage.setItem('sql', this.sql);
+            this.loading = true;
+            try {
+              const response = await fetch(`/explain${this.analyze_on ? '?analyze=1' : ''}`, {
+                method: 'POST',
+                body: this.sql
+              });
+              const data = await response.json();
+              this.plan = JSON.stringify(data?.plan);
+              this.recommendation = data?.recommendation;
+              this.prediction = data?.prediction;
+              this.actual = data?.actual;
+            } catch (error) {
+              this.result = { prediction: null, status: 'error', error: error.message };
+            } finally {
+              this.loading = false;
+            }
+          },
+          copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+              // Можно добавить визуальную обратную связь, например, изменить значок кнопки или показать уведомление
+            });
+            this.copied = true;
+            setTimeout(() => {
+              this.copied = false;
+            }, 1000)
+          },
+          applySQL(text) {
+            this.sql = text;
+            this.applied = true;
+            setTimeout(() => {
+              this.applied = false;
+            }, 1000);
+            document.getElementById('id-sql-query').focus();
+          }
         }
-      }
-    });
-    document.body.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    app.component("pev2", pev2.Plan)
-    app.mount('#app');
-  </script>
+      });
+      document.body.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      app.component("pev2", pev2.Plan)
+      app.mount('#app');
+    </script>
 </body>
 
 </html>
