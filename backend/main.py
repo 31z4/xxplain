@@ -11,6 +11,7 @@ app = FastAPI(debug=True)
 
 @app.post("/explain")
 async def post_explain(request: Request, analyze: bool = False):
+    """Получает query plan для SQL запроса"""
     body = await request.body()
     sql = body.decode()
 

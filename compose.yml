@@ -15,6 +15,15 @@ services:
       - ./benchmarks:/benchmarks:ro
       - ./data:/data:ro
 
+  xxplain-api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env.backend
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped
+
 volumes:
   xxplain-postgres-data:
     # Ручное управление созданием и удалением volume.
