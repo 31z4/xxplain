@@ -60,6 +60,17 @@ uv run scripts/train_models.py
 uv run scripts/api_usage.py
 ```
 
+## Фронтенд
+
+Запускаю так:
+
+```shell
+uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+В целом всё бесхитрострно лежит в `index.html` и написано на Vue (из-за готового PEV2)
+
+
 ## Ссылки
 
 **Инструменты**
@@ -68,6 +79,7 @@ uv run scripts/api_usage.py
 * [PostgreSQL Workload Analyzer](https://github.com/powa-team/powa)
 * [pgMustard](https://www.pgmustard.com)
 * [FlameExplain](https://flame-explain.com)
+* [PEV2](https://github.com/dalibo/pev2)
 
 **Бенчмарки и данные**
 
