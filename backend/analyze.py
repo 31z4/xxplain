@@ -1,6 +1,6 @@
 import bisect
 
-from predict import TIME_CLASSES
+from .predict import TIME_CLASSES
 
 # Для простоты предполагаем стандартный размер блока.
 # Для прода лучше читать текущее значение из БД.
