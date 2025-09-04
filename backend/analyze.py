@@ -1,7 +1,10 @@
+import bisect
+
+from predict import TIME_CLASSES
+
 # Для простоты предполагаем стандартный размер блока.
 # Для прода лучше читать текущее значение из БД.
 _BLOCK_SIZE_BYTES = 8_192
-
 # Ключи плана, соответствующие чтению данных.
 _PLAN_READ_BLOCKS = (
     "Shared Hit Blocks",
@@ -24,7 +27,7 @@ def analyze_plan(plan: dict) -> dict:
 
     return {
         "total_time_ms": total_time_ms,
-        "total_time_class": 0,  # TODO: Здесь будет настоящий класс.
+        "total_time_class": bisect.bisect_right(TIME_CLASSES, total_time_ms),
         "data_read_bytes": data_read_bytes,
         "data_read_class": 0,  # TODO: Здесь будет настоящий класс.
     }
