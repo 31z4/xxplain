@@ -12,7 +12,7 @@ async def recommend(sql: str) -> dict:
     new_sql = _llm(sql, plan)
 
     new_plan = await explain(new_sql, analyze=False, format="JSON")
-    prediction = predict(new_plan)
+    prediction = predict(new_sql, new_plan)
 
     return {
         "query": new_sql,

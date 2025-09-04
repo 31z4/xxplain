@@ -17,7 +17,7 @@ async def post_explain(request: Request, analyze: bool = False):
     sql = body.decode()
 
     plan = await explain(sql, analyze, format="JSON")
-    prediction = predict(plan)
+    prediction = predict(sql, plan)
     analysis = analyze_plan(plan)
     recommendation = await recommend(sql)
 
