@@ -80,7 +80,7 @@
                     'badge text-bg-warning': prediction?.total_time_class === 1,
                     'badge text-bg-danger': prediction?.total_time_class === 2
                   }">
-                      {{prediction?.total_time_ms}}
+                      {{formatDuration(prediction?.total_time_ms)}}
                     </span>
                   </td>
                   <td>
@@ -105,7 +105,7 @@
                     'badge text-bg-warning': actual?.total_time_class === 1,
                     'badge text-bg-danger': actual?.total_time_class === 2
                   }">
-                      {{actual?.total_time_ms}}
+                      {{formatDuration(actual?.total_time_ms)}}
                     </span>
                   </td>
                   <td>
@@ -114,7 +114,7 @@
                     'badge text-bg-warning': actual?.data_read_class === 1,
                     'badge text-bg-danger': actual?.data_read_class === 2
                   }">{{actual?.data_read_bytes}}</span>
-                  </td>
+                  </td> 
                 </tr>
               </tbody>
             </table>
@@ -208,7 +208,7 @@
                       'badge text-bg-warning': recommendation?.prediction?.total_time_class === 1,
                       'badge text-bg-danger': recommendation?.prediction?.total_time_class === 2
                     }">
-                        {{recommendation?.prediction?.total_time_ms}}
+                        {{formatDuration(recommendation?.prediction?.total_time_ms)}}
                       </span>
                     </td>
                     <td>
@@ -305,6 +305,20 @@
               this.applied = false;
             }, 1000);
             document.getElementById('id-sql-query').focus();
+          },
+          formatDuration(ms) {
+            if (ms < 0) ms = -ms;
+            const time = {
+              'дн': Math.floor(ms / 86400000),
+              'ч': Math.floor(ms / 3600000) % 24,
+              'мин': Math.floor(ms / 60000) % 60,
+              'сек': Math.floor(ms / 1000) % 60,
+              'мс': Math.floor(ms) % 1000,
+            };
+            return Object.entries(time)
+              .filter(val => val[1] !== 0)
+              .map(val => val[1] + ' ' + val[0])
+              .join(', ');
           }
         }
       });
