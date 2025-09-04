@@ -46,7 +46,7 @@ async def llm(sql: str) -> str:
     return completion.choices[0].message.content
 
 
-async def recommend(sql: str) -> dict:
+async def optimize(sql: str) -> dict:
     """Рекомендует потенциально оптимизированную версию sql запроса."""
     if not settings.OPENAI_API_KEY:
         log.warning(

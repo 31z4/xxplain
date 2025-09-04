@@ -24,7 +24,9 @@ def predict(sql: str, plan: dict[str, Any]) -> dict:
     cost_class = bisect.bisect_right(COST_CLASSES, cost) + 1
     server_params = PlanParser.extract_server_params(plan)
     model_manager = ModelManager(model_dir="models")
-    total_time_ms = model_manager.predict_with_plan(plan, sql, server_params, model_name="GradientBoosting")["prediction"]
+    total_time_ms = model_manager.predict_with_plan(
+        plan, sql, server_params, model_name="GradientBoosting"
+    )["prediction"]
     total_time_class = bisect.bisect_right(TIME_CLASSES, total_time_ms)
 
     return {
