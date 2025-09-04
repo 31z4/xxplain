@@ -80,6 +80,8 @@ uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 * [pgMustard](https://www.pgmustard.com)
 * [FlameExplain](https://flame-explain.com)
 * [PEV2](https://github.com/dalibo/pev2)
+* [SQLSolver: Proving Query Equivalence Using Linear Integer Arithmetic](https://github.com/SJTU-IPADS/SQLSolver)
+* [QED, the Query Equivalence Decider](https://github.com/qed-solver)
 
 **Бенчмарки и данные**
 
@@ -92,3 +94,5 @@ uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 
 * [Zero-Shot Cost Estimation Models](https://github.com/DataManagementLab/zero-shot-cost-estimation)
 * [LLM for Index Recommendation](https://github.com/XinxinZhao798/LLMIndexAdvisor)
+* [R-Bot: An LLM-based Query Rewrite System](https://github.com/curtis-sun/LLM4Rewrite)
+* [LLMOpt: Query Optimization utilizing Large Language Models](https://github.com/lucifer12346/LLMOpt)

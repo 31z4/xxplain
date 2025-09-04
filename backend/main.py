@@ -28,6 +28,7 @@ async def post_explain(request: Request, analyze: bool = False):
         "recommendation": recommendation,
     }
 
+
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 if __name__ == "__main__":
