@@ -5,11 +5,13 @@ import psycopg
 from .config import settings
 
 
-def _valid_explain_sql(input: str, analyze: bool, format: str) -> str:
+def valid_explain_sql(input: str, analyze: bool, format: str) -> str:
     """Простейшая функция, которая защищает от нескольких statements.
 
     Внимание! Эта функция не закрывает все возможные вектора атаки.
     Для прода требуется тщательный аудит и защита на разных уровнях (БД, connection pooler).
+    Кроме того, она некорректно работает для строковых значений, содержащих ';'.
+    Корректная реализация должна парсить SQL запрос и проверять количество statements.
     """
     # Можно иметь ; в конце.
     input = input.strip().rstrip(";")
@@ -37,7 +39,7 @@ async def _rollback():
 
 async def explain(sql: str, analyze: bool, format: str) -> dict | str:
     """Выполняет EXPLAIN для данного sql и возвращает результат в заданном формате."""
-    explain_sql = _valid_explain_sql(sql, analyze, format)
+    explain_sql = valid_explain_sql(sql, analyze, format)
 
     async with _rollback() as cur:
         await cur.execute(explain_sql)

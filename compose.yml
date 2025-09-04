@@ -3,6 +3,10 @@ name: xxplain
 services:
   postgres:
     image: postgres:15.14-bookworm
+    # Увеличить доступный размер разделяемой памяти,
+    # чтобы предотвратить ошибку "could not resize shared memory segment"
+    # во время выполнения тяжелых запросов.
+    shm_size: 256mb
     env_file: .env.postgres
     command: ['-c', 'config_file=/etc/postgresql/postgresql.conf']
     ports:
