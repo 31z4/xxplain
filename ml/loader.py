@@ -1,10 +1,12 @@
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
+
+from ml.features import extract_features
 
 
 class ModelLoadException(Exception):
@@ -42,10 +44,10 @@ if __name__ == "__main__":
         sys.exit(0)
 
     import psycopg
-    from scripts.a_collect_sql_plans import run_explain_analyze_json
-    from ml.features import get_time_from_plan
     from dotenv import load_dotenv
-    from ml.features import extract_features
+
+    from ml.features import get_time_from_plan
+    from scripts.a_collect_sql_plans import run_explain_analyze_json
 
     # Specify the path to your custom .env file
     dotenv_path = Path(".env.postgres")
