@@ -1,8 +1,6 @@
 import argparse
 import csv
 import json
-from datetime import date
-from decimal import Decimal
 from glob import glob
 from pathlib import Path
 from time import time
@@ -17,15 +15,13 @@ from backend.config import settings
 log = structlog.stdlib.get_logger()
 
 
-class _CustomJSONEncoder(json.JSONEncoder):
-    """Custom JSON encoder that handles Decimal and datetime.date types."""
+def configure_string_adapters(conn):
+    """Конфигурирует адаптеры для загрузки типов date и numeric как строк.
 
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return str(obj)
-        elif isinstance(obj, date):
-            return obj.isoformat()
-        return super().default(obj)
+    Позволяет в последующем без проблем использовать JSON для (де)сериализации.
+    """
+    conn.adapters.register_loader("numeric", psycopg.types.string.TextLoader)
+    conn.adapters.register_loader("date", psycopg.types.string.TextLoader)
 
 
 def _read(path: str) -> dict:
@@ -56,11 +52,10 @@ def _exec(sql_glob: list[str], single: bool, output: str, timeout: int) -> None:
             else:
                 data.extend(_read_many(path))
 
-    with (
-        psycopg.Connection.connect(str(settings.POSTGRES_DSN)) as conn,
-        conn.cursor() as cur,
-    ):
-        cur.execute(f"SET statement_timeout TO '{timeout}s'")
+    with psycopg.Connection.connect(str(settings.POSTGRES_DSN)) as conn:
+        configure_string_adapters(conn)
+
+        conn.execute(f"SET statement_timeout TO '{timeout}s'")
         conn.commit()
 
         for i, _ in enumerate(data):
@@ -69,12 +64,12 @@ def _exec(sql_glob: list[str], single: bool, output: str, timeout: int) -> None:
 
             sql = data[i]["query"]
             explain_sql = f"EXPLAIN (BUFFERS, SETTINGS, FORMAT JSON) {sql}"
-            obj = cur.execute(explain_sql).fetchone()
+            obj = conn.execute(explain_sql).fetchone()
             data[i]["explain"] = obj[0][0]
 
             start = time()
             try:
-                objs = cur.execute(sql).fetchall()
+                objs = conn.execute(sql).fetchall()
             except psycopg.errors.QueryCanceled:
                 _log.warning("Таймаут запроса")
                 data[i]["output"] = None
@@ -105,8 +100,8 @@ def _exec(sql_glob: list[str], single: bool, output: str, timeout: int) -> None:
                         row["path"],
                         row["line"],
                         row["query"],
-                        json.dumps(row["explain"], cls=_CustomJSONEncoder),
-                        json.dumps(row["output"], cls=_CustomJSONEncoder),
+                        json.dumps(row["explain"]),
+                        json.dumps(row["output"]),
                         row["latency"],
                     )
                 )
