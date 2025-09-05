@@ -30,4 +30,5 @@ dev = [
     "scikit-learn>=1.7.1",
     "tpchgen-cli>=2.0.0",
     "requests>=2.32.5",
+    "deepdiff>=8.6.1",
 ]
