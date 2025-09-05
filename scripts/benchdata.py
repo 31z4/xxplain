@@ -59,8 +59,10 @@ def _exec(sql_glob: list[str], single: bool, output: str, timeout: int) -> None:
         conn.commit()
 
         for i, _ in enumerate(data):
-            _log = log.bind(path=f"{data[i]['path']}:{data[i]['line']}")
-            _log.info("Выполняю запрос")
+            structlog.contextvars.bind_contextvars(
+                path=f"{data[i]['path']}:{data[i]['line']}"
+            )
+            log.info("Выполняю запрос")
 
             sql = data[i]["query"]
             explain_sql = f"EXPLAIN (BUFFERS, SETTINGS, FORMAT JSON) {sql}"
@@ -71,7 +73,7 @@ def _exec(sql_glob: list[str], single: bool, output: str, timeout: int) -> None:
             try:
                 objs = conn.execute(sql).fetchall()
             except psycopg.errors.QueryCanceled:
-                _log.warning("Таймаут запроса")
+                log.warning("Таймаут запроса")
                 data[i]["output"] = None
                 data[i]["latency"] = timeout
                 conn.rollback()
