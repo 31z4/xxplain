@@ -50,7 +50,7 @@ def _test(input: str, output: str, timeout: int) -> None:
 
                 explain = json.loads(row["explain"])
                 cost = row["optimized_explain"]["Plan"]["Total Cost"]
-                cost_diff = cost - explain["Plan"]["Total Cost"]
+                cost_ratio = cost / explain["Plan"]["Total Cost"]
 
                 expected = json.loads(row["output"])
                 output_match = (
@@ -58,17 +58,18 @@ def _test(input: str, output: str, timeout: int) -> None:
                     == {}
                 )
 
-                latency_diff = latency - float(row["latency"])
+                latency_ratio = latency / float(row["latency"])
 
                 log.info(
                     "Результат теста",
                     output_match=output_match,
-                    cost_diff=cost_diff,
-                    latency_diff=latency_diff,
+                    cost_ratio=cost_ratio,
+                    latency_ratio=latency_ratio,
                 )
 
                 row["optimized_output"] = objs
                 row["optimized_latency"] = latency
+                row["output_match"] = output_match
 
                 data.append(row)
 
@@ -87,6 +88,7 @@ def _test(input: str, output: str, timeout: int) -> None:
                 "optimized_explain",
                 "optimized_output",
                 "optimized_latency",
+                "output_match",
             )
         )
         for row in data:
@@ -103,6 +105,7 @@ def _test(input: str, output: str, timeout: int) -> None:
                     json.dumps(row["optimized_explain"]),
                     json.dumps(row["optimized_output"]),
                     row["optimized_latency"],
+                    row["output_match"],
                 )
             )
 

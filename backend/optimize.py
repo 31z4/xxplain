@@ -1,7 +1,13 @@
+import csv
+import io
 from pathlib import Path
+from typing import Iterable
 
+import psycopg
 import structlog
 from openai import AsyncOpenAI
+from psycopg.rows import dict_row
+from sqlglot import exp, parse
 
 from .config import settings
 from .pg import explain
@@ -18,6 +24,9 @@ _SYSTEM_PROMPT_TEMPLATE = (
     "You are given the following Postgres 15 database schema to help you with "
     "rewriting the queries:\n"
     "\n{schema}\n"
+    "You are also given the following table stats in CSV format to help you with "
+    "rewriting the queries:\n"
+    "\n{stats}\n"
     "A user has provided the following query that is potentially inefficient:"
 )
 
@@ -29,9 +38,50 @@ _client = AsyncOpenAI(
 log = structlog.stdlib.get_logger()
 
 
+def _tables(schema: str) -> Iterable[str]:
+    tables = set()
+    for e in parse(schema):
+        tables.update(t.name for t in e.find_all(exp.Table))
+    return tables
+
+
+def _csv(input: list[dict]) -> str:
+    output = io.StringIO()
+    fieldnames = input[0].keys()
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+
+    writer.writeheader()
+    writer.writerows(input)
+
+    return output.getvalue()
+
+
+async def _stats(tables: Iterable[str]) -> str:
+    async with await psycopg.AsyncConnection.connect(
+        str(settings.POSTGRES_DSN), row_factory=dict_row
+    ) as conn:
+        cur = await conn.execute(
+            """
+            SELECT
+                relname AS tablename,
+                n_live_tup AS row_count,
+                pg_size_pretty(pg_table_size(relid)) AS table_size_excluding_indexes
+            FROM pg_stat_user_tables
+            WHERE relname = ANY(%s)
+        """,
+            [list(tables)],
+        )
+        objs = await cur.fetchall()
+
+    return _csv(objs)
+
+
 async def llm(sql: str) -> str:
     schema = Path(settings.POSTGRES_DB_SCHEMA).read_text(encoding="utf-8")
-    system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(schema=schema)
+    tables = _tables(schema)
+    stats = await _stats(tables)
+
+    system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(schema=schema, stats=stats)
 
     log.debug("Запрос к LLM", system_prompt=system_prompt, user_prompt=sql)
     completion = await _client.chat.completions.create(

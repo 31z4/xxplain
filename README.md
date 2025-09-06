@@ -109,6 +109,7 @@ uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 * [DSB Benchmark](https://github.com/microsoft/dsb)
 * [A Benchmark for Real-Time Analytics Applications](https://github.com/timescale/rtabench)
 * [TPC-DS benchmark kit with some modifications/fixes](https://github.com/gregrahn/tpcds-kit)
+* [Supplementary materials for SlabCity: Whole-Query Optimization using Program Synthesis](https://github.com/eidos06/SlabCity)
 
 **Модели**
 
