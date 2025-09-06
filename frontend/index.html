@@ -81,8 +81,8 @@
                   </button>
                 </h2>
                 <div id="collapse-plan" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                  <div class="accordion-body">
-                    <pev2 :plan-source="plan" :plan-query="sql"></pev2>
+                  <div class="accordion-body bs-theme-light">
+                    <pev2 :plan-source="plan" :plan-query="pevsql"></pev2>
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@
                     </h2>
                     <div id="collapse-recommendation-plan" class="accordion-collapse collapse"
                       data-bs-parent="#accordionExample">
-                      <div class="accordion-body">
+                      <div class="accordion-body bs-theme-light">
                         <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="sql"></pev2>
                       </div>
                     </div>

@@ -48,17 +48,37 @@
 
 ## Обучение моделей
 
-```shell
-uv run scripts/build_datasets.py
-uv run scripts/train_models.py
-```
+1. Сбор данных
 
-Файлы соберутся в `datasets` и `models` соответственно.
-Проверить работу моделей можно с помощью скрипта к бекенду:
+    Запустить
 
-```shell
-uv run scripts/api_usage.py
-```
+    ```
+        scripts/a_collect_sql_plans.py`
+    ```
+
+    оно соберёт EXPLAIN ANALYZE всё-что-можно-собрать в
+    `train_query_plans.csv` из папки `benchmarks/tpc-h/generated` и `test_query_plans.csv` из
+    папки `benchmarks/tpc-h/queries`. Процесс долгий, придётся подождать. Остальные быстрые.
+
+2. Обогаить датасеты фичами
+
+    ```
+    python enrich_dataset.py datasets/train_query_plans.csv > train_dataset.csv
+    ```
+
+3. Обучить модельки
+
+    ```
+    python scripts/c_train_models.py datasets/train_dataset.csv
+    ```
+
+4. Загрузчик моделей можно проверить так
+
+    ```
+    python ml/loader.py benchmarks/tpc-h/queries/q15.sql
+    ```
+
+Фичи из планов собираются через 
 
 ## Фронтенд
 
