@@ -65,6 +65,7 @@ if __name__ == "__main__":
 
     # Create dataframe from features and save to CSV
     features_df = pd.DataFrame(features_list)
+    features_df = features_df[features_df['time'] > 0]
     features_df.to_csv(sys.argv[1], index=False)
 
     conn.close()
