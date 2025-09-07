@@ -27,6 +27,8 @@ def _test(input: str, output: str, timeout: int) -> None:
         with open(input, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                data.append(row)
+
                 structlog.contextvars.bind_contextvars(
                     path=f"{row['path']}:{row['line']}"
                 )
@@ -34,7 +36,12 @@ def _test(input: str, output: str, timeout: int) -> None:
 
                 sql = row["optimized_query"]
                 explain_sql = f"EXPLAIN (BUFFERS, SETTINGS, FORMAT JSON) {sql}"
-                obj = conn.execute(explain_sql).fetchone()
+
+                try:
+                    obj = conn.execute(explain_sql).fetchone()
+                except psycopg.errors.SyntaxError:
+                    log.warning("Невалидный запрос")
+                    continue
                 row["optimized_explain"] = obj[0][0]
 
                 start = time()
@@ -42,11 +49,12 @@ def _test(input: str, output: str, timeout: int) -> None:
                     objs = conn.execute(sql).fetchall()
                 except psycopg.errors.QueryCanceled:
                     log.warning("Таймаут запроса")
-                    row["optimized_output"] = None
                     row["optimized_latency"] = timeout
                     conn.rollback()
                     continue
                 latency = time() - start
+                row["optimized_latency"] = latency
+                row["optimized_output"] = objs
 
                 explain = json.loads(row["explain"])
                 cost = row["optimized_explain"]["Plan"]["Total Cost"]
@@ -57,21 +65,15 @@ def _test(input: str, output: str, timeout: int) -> None:
                     DeepDiff(objs, expected, ignore_type_in_groups=[(list, tuple)])
                     == {}
                 )
+                row["output_match"] = output_match
 
                 latency_ratio = latency / float(row["latency"])
-
                 log.info(
                     "Результат теста",
                     output_match=output_match,
                     cost_ratio=cost_ratio,
                     latency_ratio=latency_ratio,
                 )
-
-                row["optimized_output"] = objs
-                row["optimized_latency"] = latency
-                row["output_match"] = output_match
-
-                data.append(row)
 
     with open(output, "w", newline="") as f:
         writer = csv.writer(f)
@@ -102,10 +104,10 @@ def _test(input: str, output: str, timeout: int) -> None:
                     row["latency"],
                     row["optimized_query"],
                     row["optimization_time"],
-                    json.dumps(row["optimized_explain"]),
-                    json.dumps(row["optimized_output"]),
-                    row["optimized_latency"],
-                    row["output_match"],
+                    json.dumps(row.get("optimized_explain")),
+                    json.dumps(row.get("optimized_output")),
+                    row.get("optimized_latency"),
+                    row.get("output_match"),
                 )
             )
 

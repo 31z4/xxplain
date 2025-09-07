@@ -56,7 +56,7 @@ def _csv(input: list[dict]) -> str:
     return output.getvalue()
 
 
-async def _stats(tables: Iterable[str]) -> str:
+async def stats(tables: Iterable[str]) -> str:
     async with await psycopg.AsyncConnection.connect(
         str(settings.POSTGRES_DSN), row_factory=dict_row
     ) as conn:
@@ -73,13 +73,14 @@ async def _stats(tables: Iterable[str]) -> str:
         )
         objs = await cur.fetchall()
 
-    return _csv(objs)
+    return objs
 
 
 async def llm(sql: str) -> str:
     schema = Path(settings.POSTGRES_DB_SCHEMA).read_text(encoding="utf-8")
     tables = _tables(schema)
-    stats = await _stats(tables)
+    stats = await stats(tables)
+    stats = _csv(stats)
 
     system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(schema=schema, stats=stats)
 
@@ -110,7 +111,12 @@ async def optimize(sql: str) -> dict:
         log.exception("Не удалось получить рекомендации")
         return {}
 
-    new_plan = await explain(new_sql, analyze=False, format="JSON")
+    try:
+        new_plan = await explain(new_sql, analyze=False, format="JSON")
+    except psycopg.errors.SyntaxError:
+        log.exception("Не валидный запрос в рекомендации")
+        return {}
+
     prediction = predict(new_sql, new_plan)
 
     return {
