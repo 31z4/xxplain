@@ -39,8 +39,13 @@ def _test(input: str, output: str, timeout: int) -> None:
 
                 try:
                     obj = conn.execute(explain_sql).fetchone()
-                except psycopg.errors.SyntaxError:
+                except (
+                    psycopg.errors.ProgrammingError,
+                    psycopg.errors.NotSupportedError,
+                    psycopg.errors.DataError,
+                ):
                     log.warning("Невалидный запрос")
+                    conn.rollback()
                     continue
                 row["optimized_explain"] = obj[0][0]
 
