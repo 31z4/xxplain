@@ -52,8 +52,8 @@
                 Analyze
               </label>
             </div>
-            <button type="button" class="btn btn-primary" @click="send" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <button type="button" class="btn btn-primary" @click="send" :disabled="ui_analyze_loading">
+              <span v-if="ui_analyze_loading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
               <span role="status">{{ loading ? 'Обрабатывается...' : 'EXPLAIN' }}</span>
             </button>
           </div>
@@ -89,6 +89,7 @@
             </div>
           </div>
           <div class="mb-3" v-if="recommendation">
+            <h2 class="quiet" v-if="ui_optimize_loading">Оптимизация...</h2>
             <div v-if="recommendation?.query">
               <h2>Рекомендованный запрос</h2>
               <sql-card title="✨ Рекомендации" :sql="recommendation.query" @apply-sql="handleApply"></sql-card>
@@ -113,7 +114,7 @@
                 </div>
               </div>
             </div>
-            <h2 v-else class="quiet">Нет рекомендаций</h2>
+            <h2 v-else-if="!ui_optimize_loading" class="quiet">Нет рекомендаций</h2>
           </div>
       </div>
       <br>
@@ -155,9 +156,10 @@
           
           // Реактивные переменные
           const sql = ref(localStorage.getItem('sql') || '');
-          const loading = ref(false);
-          const copied = ref(false);
-          const applied = ref(false);
+          const ui_analyze_loading = ref(false);
+          const ui_optimize_loading = ref(false);
+          const ui_copied = ref(false);
+          const ui_applied = ref(false);
           const analyze_on = ref(false);
           
           // Статические данные
@@ -225,9 +227,13 @@ ORDER BY
           const plan = ref(null);
           
           // Методы
-          const send = async () => {
+          const send = async() => {
+            _analyze();
+            _optimize();
+          }
+          const _analyze = async () => {
             localStorage.setItem('sql', sql.value);
-            loading.value = true;
+            ui_analyze_loading.value = true;
             try {
               const response = await fetch(`/explain${analyze_on.value ? '?analyze=1' : ''}`, {
                 method: 'POST',
@@ -235,32 +241,48 @@ ORDER BY
               });
               const data = await response.json();
               plan.value = JSON.stringify(data?.plan);
-              recommendation.value = data?.recommendation;
               prediction.value = data?.prediction;
               actual.value = data?.actual;
             } catch (error) {
               console.error('Error:', error.message);
             } finally {
-              loading.value = false;
+              ui_analyze_loading.value = false;
             }
           };
+          const _optimize = async() => {
+            ui_optimize_loading.value = true;
+            recommendation.value = {};
+            try {
+              const response = await fetch('/optimize', {
+                  method: 'POST',
+                  body: sql.value
+                });
+                const data = await response.json();
+                recommendation.value = data;
+            } catch (error) {
+              console.error('Error:', error.message);
+            } finally {
+              ui_optimize_loading.value = false;
+            }
+          }
+
           
           const copyToClipboard = (text) => {
             navigator.clipboard.writeText(text).then(() => {
               // Можно добавить визуальную обратную связь, например, изменить значок кнопки или показать уведомление
             });
-            copied.value = true;
+            ui_copied.value = true;
             setTimeout(() => {
-              copied.value = false;
+              ui_copied.value = false;
             }, 1000);
           };
           
           const applySQL = (text) => {
             console.log('applySql', text);
             sql.value = text;
-            applied.value = true;
+            ui_applied.value = true;
             setTimeout(() => {
-              applied.value = false;
+              ui_applied.value = false;
             }, 1000);
             document.getElementById('id-sql-query').focus();
           };
@@ -286,9 +308,10 @@ ORDER BY
           
           return {
             sql,
-            loading,
-            copied,
-            applied,
+            ui_analyze_loading,
+            ui_optimize_loading,
+            ui_copied,
+            ui_applied,
             analyze_on,
             sql_samples,
             recommendation,
