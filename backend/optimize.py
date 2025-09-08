@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Iterable
 
 import psycopg
+import sqlparse
 import structlog
 from openai import AsyncOpenAI
 from psycopg.rows import dict_row
@@ -133,6 +134,8 @@ async def optimize(sql: str) -> dict:
     if prediction == old_prediction:
         log.warning("Метрики рекомендованного запроса не изменились")
         return {}
+
+    new_sql = sqlparse.format(new_sql, reindent_aligned=True, indent_width=4)
 
     return {
         "query": new_sql,
