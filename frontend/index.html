@@ -82,7 +82,7 @@
                 </h2>
                 <div id="collapse-plan" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                   <div class="accordion-body bs-theme-light">
-                    <pev2 :plan-source="plan" :plan-query="pevsql"></pev2>
+                    <pev2 :plan-source="JSON.stringify(plan)" :plan-query="sql"></pev2>
                   </div>
                 </div>
               </div>
@@ -107,7 +107,7 @@
                     <div id="collapse-recommendation-plan" class="accordion-collapse collapse"
                       data-bs-parent="#accordionExample">
                       <div class="accordion-body bs-theme-light">
-                        <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="sql"></pev2>
+                        <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="recommendation?.query"></pev2>
                       </div>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ ORDER BY
                 body: sql.value
               });
               const data = await response.json();
-              plan.value = JSON.stringify(data?.plan);
+              plan.value = data?.plan;
               prediction.value = data?.prediction;
               actual.value = data?.actual;
             } catch (error) {
