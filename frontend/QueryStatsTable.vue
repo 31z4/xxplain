@@ -3,9 +3,9 @@
     <thead>
       <tr>
         <th scope="col"></th>
-        <th scope="col">Cost</th>
-        <th scope="col">Total time</th>
-        <th scope="col">Data read</th>
+        <th scope="col">Стоимость</th>
+        <th scope="col">Время</th>
+        <th scope="col">Данные</th>
       </tr>
     </thead>
     <tbody>

@@ -31,9 +31,10 @@
     EOF
     ```
 
-2. Создай чистый Docker volume для Postgres:
+2. Создай чистый Docker volume для Postgres и папку для данных:
 
         make clean-docker-volumes
+        mkdir data
 
 3. Запусти Postgres:
 

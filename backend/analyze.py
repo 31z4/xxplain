@@ -1,6 +1,6 @@
 import bisect
 
-from .predict import TIME_CLASSES, SIZE_CLASSES
+from .predict import SIZE_CLASSES, TIME_CLASSES
 
 # Для простоты предполагаем стандартный размер блока.
 # Для прода лучше читать текущее значение из БД.
@@ -27,7 +27,7 @@ def analyze_plan(plan: dict) -> dict:
 
     return {
         "total_time_ms": total_time_ms,
-        "total_time_class": bisect.bisect_right(TIME_CLASSES, total_time_ms),
+        "total_time_class": bisect.bisect_right(TIME_CLASSES, total_time_ms) + 1,
         "data_read_bytes": data_read_bytes,
-        "data_read_class": bisect.bisect_right(SIZE_CLASSES, data_read_bytes)
+        "data_read_class": bisect.bisect_right(SIZE_CLASSES, data_read_bytes) + 1,
     }
