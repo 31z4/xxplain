@@ -5,6 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.backend", extra="ignore")
 
+    DEBUG: bool = False
+
     POSTGRES_DSN: PostgresDsn
     POSTGRES_DB_SCHEMA: str = "benchmarks/tpc-h/schema.sql"
 

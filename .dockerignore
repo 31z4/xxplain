@@ -1,0 +1,17 @@
+.ruff_cache
+.venv
+benchmarks/toast
+benchmarks/tpc-h/generated
+benchmarks/tpc-h/queries
+data
+datasets
+docker
+lab
+scripts
+.env
+.env.*
+.gitignore
+compose.yml
+*.md
+Makefile
+**/__pycache__

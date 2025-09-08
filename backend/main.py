@@ -3,11 +3,12 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
 from .analyze import analyze_plan
+from .config import settings
 from .optimize import optimize
 from .pg import explain
 from .predict import predict
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=settings.DEBUG)
 
 
 @app.post("/explain")
@@ -44,6 +45,7 @@ app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 if __name__ == "__main__":
     uvicorn.run(
         "backend.main:app",
+        host="0.0.0.0",  # Для работы в Docker.
         reload_dirs="backend",
-        reload=True,
+        reload=settings.DEBUG,
     )

@@ -7,6 +7,7 @@ services:
     # чтобы предотвратить ошибку "could not resize shared memory segment"
     # во время выполнения тяжелых запросов.
     shm_size: 256mb
+    restart: always
     env_file: .env.postgres
     command: ['-c', 'config_file=/etc/postgresql/postgresql.conf']
     ports:
@@ -19,14 +20,16 @@ services:
       - ./benchmarks:/benchmarks:ro
       - ./data:/data:ro
 
-  xxplain-api:
-    build: .
-    ports:
-      - "8000:8000"
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    pull_policy: build
+    restart: always
     env_file: .env.backend
-    volumes:
-      - ./models:/app/models:ro
-    restart: unless-stopped
+    ports:
+      # Для удобства локальной разработки.
+      - 127.0.0.1:8000:8000
 
 volumes:
   xxplain-postgres-data:

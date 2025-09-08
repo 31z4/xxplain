@@ -1,0 +1,11 @@
+{
+  "models_available": [
+    "Ridge",
+    "Lasso",
+    "RandomForest",
+    "GradientBoosting",
+    "XGBoost",
+    "CatBoost"
+  ],
+  "scaler_path": "time_models/scaler.pkl"
+}

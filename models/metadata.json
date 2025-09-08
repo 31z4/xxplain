@@ -1,9 +1,0 @@
-{
-  "models_available": [
-    "Ridge",
-    "Lasso",
-    "RandomForest",
-    "GradientBoosting"
-  ],
-  "scaler_path": "models/scaler.pkl"
-}
