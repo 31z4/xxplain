@@ -84,7 +84,7 @@
       </button>
     </div>
     <div class="card-body">
-      <code>{{ sql }}</code>
+      <pre><code>{{ sql }}</code></pre>
     </div>
   </div>
 </template>

@@ -27,18 +27,23 @@
     .sql-input {
       width: 100%;
       min-height: 200px;
-      height: 80vh;
+      height: 33em;
       font-family: monospace;
       padding: 10px;
       box-sizing: border-box;
     }
+    .text-class-1 { background-color: var(--bs-green); }
+    .text-class-2 { background-color: var(--bs-teal); }
+    .text-class-3 { background-color: var(--bs-yellow); }
+    .text-class-4 { background-color: var(--bs-orange); }
+    .text-class-5 { background-color: var(--bs-red); }
   </style>
 </head>
 
 <body data-bs-theme="">
-  <div id="app" class="container">
+  <div id="app" class="container-fluid">
     <div class="row">
-      <div class="col col-6">
+      <div class="col-sm-12 col-lg-6">
         <form class="d-flex flex-column">
           <div class="mb-3">
             <h2>Проанализируйте ваш SQL запрос</h2>
@@ -59,7 +64,7 @@
           </div>
         </form>
       </div>
-      <div class="col col-6">
+      <div class="col-sm-12 col-lg-6">
         <form class="d-flex flex-column">
           <div class="mb-3" v-if="!prediction">
             <h2 class="quiet">... или воспользуйтесь примерами</h2>
@@ -67,7 +72,7 @@
               @apply-sql="handleApply"
               v-for="(sample, index) in sql_samples"></sql-card>
           </div>
-          <div class="mb-3" v-if="prediction">
+          <div id="id-analyze" class="mb-3" v-if="prediction">
             <h2>Анализ запроса</h2>
             <query-stats-table :prediction="prediction" :actual="actual"></query-stats-table>
           </div>
@@ -81,14 +86,14 @@
                   </button>
                 </h2>
                 <div id="collapse-plan" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                  <div class="accordion-body bs-theme-light">
+                  <div class="accordion-body bs-theme-light" data-bs-theme="light">
                     <pev2 :plan-source="JSON.stringify(plan)" :plan-query="sql"></pev2>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="mb-3" v-if="recommendation">
+          <div id="id-optimize" class="mb-3" v-if="recommendation">
             <h2 class="quiet" v-if="ui_optimize_loading">Оптимизация...</h2>
             <div v-if="recommendation?.query">
               <h2>Рекомендованный запрос</h2>
@@ -106,7 +111,7 @@
                     </h2>
                     <div id="collapse-recommendation-plan" class="accordion-collapse collapse"
                       data-bs-parent="#accordionExample">
-                      <div class="accordion-body bs-theme-light">
+                      <div class="accordion-body" data-bs-theme="light">
                         <pev2 :plan-source="JSON.stringify(recommendation?.plan)" :plan-query="recommendation?.query"></pev2>
                       </div>
                     </div>
@@ -243,6 +248,9 @@ ORDER BY
               plan.value = data?.plan;
               prediction.value = data?.prediction;
               actual.value = data?.actual;
+              setTimeout(() => {
+                document.getElementById('id-analyze')?.scrollIntoView();
+              }, 100);
             } catch (error) {
               console.error('Error:', error.message);
             } finally {
@@ -259,6 +267,9 @@ ORDER BY
                 });
                 const data = await response.json();
                 recommendation.value = data;
+                setTimeout(() => {
+                  document.getElementById('id-optimize')?.scrollIntoView();
+                }, 100)
             } catch (error) {
               console.error('Error:', error.message);
             } finally {
@@ -312,7 +323,6 @@ ORDER BY
       });
       document.body.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
       app.component("pev2", pev2.Plan);
-
       app.mount('#app');
     </script>
 </body>

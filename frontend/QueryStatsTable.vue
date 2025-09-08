@@ -1,5 +1,5 @@
 <template>
-  <table class="table">
+  <table class="table ">
     <thead>
       <tr>
         <th scope="col"></th>
@@ -12,37 +12,28 @@
       <tr v-if="prediction">
         <th scope="row">Прогноз</th>
         <td>
-          <span
-            :class="{
-              'badge text-bg-success': prediction?.cost_class === 0,
-              'badge text-bg-warning': prediction?.cost_class === 1,
-              'badge text-bg-danger':
-                prediction?.cost_class === 2 || prediction?.cost_class === 3,
-            }"
-            >{{ prediction?.cost }}</span
-          >
+          <span class="badge text-class-1" v-if="prediction?.cost_class === 0">оч. дешевый</span>
+          <span class="badge text-class-2" v-if="prediction?.cost_class === 1">дешевый</span>
+          <span class="badge text-class-3" v-if="prediction?.cost_class === 2">средний</span>
+          <span class="badge text-class-4" v-if="prediction?.cost_class === 3">дорогой</span>
+          <span class="badge text-class-5" v-if="prediction?.cost_class === 4">оч. дорогой</span>
+          <p class="mb-0">{{ foramtCost(prediction?.cost) }}</p>
         </td>
         <td>
-          <span
-            :class="{
-              'badge text-bg-success': prediction?.total_time_class === 0,
-              'badge text-bg-warning': prediction?.total_time_class === 1,
-              'badge text-bg-danger': prediction?.total_time_class === 2,
-            }"
-          >
-            {{ formatDuration(prediction?.total_time_ms) }}
-          </span>
+          <span class="badge text-class-1" v-if="prediction?.total_time_class === 0">оч. быстрый</span>
+          <span class="badge text-class-2" v-if="prediction?.total_time_class === 1">быстрый</span>
+          <span class="badge text-class-3" v-if="prediction?.total_time_class === 2">средний</span>
+          <span class="badge text-class-4" v-if="prediction?.total_time_class === 3">долгий</span>
+          <span class="badge text-class-5" v-if="prediction?.total_time_class === 4">оч. долгий</span>
+          <p class="mb-0">{{ formatDuration(prediction?.total_time_ms) }}</p>
         </td>
         <td>
-          <span
-            :class="{
-              'badge text-bg-success': prediction?.data_read_class === 0,
-              'badge text-bg-warning': prediction?.data_read_class === 1,
-              'badge text-bg-danger': prediction?.data_read_class === 2,
-            }"
-          >
-            {{ foramtSize(prediction?.data_read_bytes) }}
-          </span>
+          <span class="badge text-class-1" v-if="prediction?.data_read_class === 0">оч. мало</span>
+          <span class="badge text-class-2" v-if="prediction?.data_read_class === 1">мало</span>
+          <span class="badge text-class-3" v-if="prediction?.data_read_class === 2">средне</span>
+          <span class="badge text-class-4" v-if="prediction?.data_read_class === 3">много</span>
+          <span class="badge text-class-5" v-if="prediction?.data_read_class === 4">оч. много</span>
+          <p class="mb-0">{{ foramtSize(prediction?.data_read_bytes) }}</p>
         </td>
       </tr>
       <tr v-if="actual?.total_time_ms">
@@ -51,25 +42,21 @@
           &mdash;
         </td>
         <td>
-          <span
-            :class="{
-              'badge text-bg-success': actual?.total_time_class === 0,
-              'badge text-bg-warning': actual?.total_time_class === 1,
-              'badge text-bg-danger': actual?.total_time_class === 2,
-            }"
-          >
-            {{ formatDuration(actual?.total_time_ms) }}
-          </span>
+          <span class="badge text-class-1" v-if="actual?.total_time_class === 0">оч. быстрый</span>
+          <span class="badge text-class-2" v-if="actual?.total_time_class === 1">быстрый</span>
+          <span class="badge text-class-3" v-if="actual?.total_time_class === 2">средний</span>
+          <span class="badge text-class-4" v-if="actual?.total_time_class === 3">долгий</span>
+          <span class="badge text-class-5" v-if="actual?.total_time_class === 4">оч. долгий</span>
+          <p class="mb-0">{{ formatDuration(actual?.total_time_ms) }}</p>
         </td>
         <td>
-          <span
-            :class="{
-              'badge text-bg-success': actual?.data_read_class === 0,
-              'badge text-bg-warning': actual?.data_read_class === 1,
-              'badge text-bg-danger': actual?.data_read_class === 2,
-            }"
-            >{{ foramtSize(actual?.data_read_bytes) }}</span
-          >
+          <span class="badge text-class-1" v-if="actual?.data_read_class === 0">оч. мало</span>
+          <span class="badge text-class-2" v-if="actual?.data_read_class === 1">мало</span>
+          <span class="badge text-class-3" v-if="actual?.data_read_class === 2">средне</span>
+          <span class="badge text-class-4" v-if="actual?.data_read_class === 3">много</span>
+          <span class="badge text-class-5" v-if="actual?.data_read_class === 4">оч. много</span>
+          <p class="mb-0">{{ foramtSize(actual?.data_read_bytes) }}</p>
+
         </td>
       </tr>
     </tbody>
@@ -104,7 +91,20 @@ const formatDuration = (ms) => {
     .map((val) => val[1] + " " + val[0])
     .join(", ")
 }
-
+function foramtCost(bytes, dp = 1) {
+  const thresh = 1000;
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' ';
+  }
+  const units = ['k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+  let u = -1;
+  const r = 10 ** dp;
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+  return bytes.toFixed(dp) + ' ' + units[u];
+}
 function foramtSize(bytes, si = false, dp = 1) {
   const thresh = si ? 1000 : 1024;
   if (Math.abs(bytes) < thresh) {
