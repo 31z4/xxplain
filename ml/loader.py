@@ -25,8 +25,8 @@ def load_model(model_name: str, model_dir: Path):
     return model, scaler
 
 
-def predict(model_name, sql, plan):
-    model, scaler = load_model(model_name, Path("models"))
+def predict(model_name, target, sql, plan):
+    model, scaler = load_model(model_name, Path(target))
     features = extract_features(plan, sql)
     features_df = pd.DataFrame([features])
     features_scaled = scaler.transform(features_df)
@@ -67,6 +67,6 @@ if __name__ == "__main__":
         plan = run_explain_analyze_json(cur, sql, analyze=True)
     plan = plan[0]
     features = extract_features(plan, sql)
-    prediction = predict("randomforest", sql, plan)
+    prediction = predict("catboost", "time_models", sql, plan)
     actual_time = get_time_from_plan(plan)
     print(f"actual time: {actual_time}, prediction: {prediction}")

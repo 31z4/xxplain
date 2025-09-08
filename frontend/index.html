@@ -290,22 +290,7 @@ ORDER BY
           const handleApply = (sqlText) => {
             applySQL(sqlText);
           };
-          
-          const formatDuration = (ms) => {
-            if (ms < 0) ms = -ms;
-            const time = {
-              'дн': Math.floor(ms / 86400000),
-              'ч': Math.floor(ms / 3600000) % 24,
-              'мин': Math.floor(ms / 60000) % 60,
-              'сек': Math.floor(ms / 1000) % 60,
-              'мс': Math.floor(ms) % 1000,
-            };
-            return Object.entries(time)
-              .filter(val => val[1] !== 0)
-              .map(val => val[1] + ' ' + val[0])
-              .join(', ');
-          };
-          
+
           return {
             sql,
             ui_analyze_loading,
@@ -322,7 +307,6 @@ ORDER BY
             copyToClipboard,
             applySQL,
             handleApply,
-            formatDuration
           };
         }
       });

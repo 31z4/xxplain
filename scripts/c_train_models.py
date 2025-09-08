@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from xgboost import XGBRegressor
+from catboost import CatBoostRegressor
 import joblib
 from pathlib import Path
 import json
@@ -24,6 +26,7 @@ def load_dataset(dataset_path: str):
 
 def prepare_data(
     data,
+    target_column: str = 'time',
     test_size: float = 0.2,
     val_size: float = 0.1
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -31,7 +34,8 @@ def prepare_data(
     Подготавливает данные для обучения
 
     Args:
-        data: Список словарей с features, target (time или size, впиши)
+        data: Список словарей с features, target (time или size)
+        target_column: Название колонки с целевой переменной
         test_size: Размер тестовой выборки
         val_size: Размер валидационной выборки
 
@@ -42,7 +46,7 @@ def prepare_data(
     targets = []
     for item in data:
         try:
-            target = item.get('time')
+            target = item.get(target_column)
             features = json.loads(item.get('features'))
 
             if target is None:
@@ -87,6 +91,122 @@ def prepare_data(
     print(f"  Test: {X_test.shape}")
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def prepare_train_data(
+    data,
+    target_column: str = 'time',
+    val_size: float = 0.1
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[str]]:
+    """
+    Подготавливает обучающие данные (train/val)
+
+    Args:
+        data: Список словарей с features, target (time или size)
+        target_column: Название колонки с целевой переменной
+        val_size: Размер валидационной выборки
+
+    Returns:
+        Кортеж (X_train, X_val, y_train, y_val)
+    """
+    features_list = []
+    targets = []
+    for item in data:
+        try:
+            target = item.get(target_column)
+            features = json.loads(item.get('features'))
+
+            if target is None:
+                continue
+
+            features_list.append(features)
+            targets.append(float(target))
+
+        except Exception as e:
+            print(f"Ошибка обработки элемента: {e}")
+            continue
+
+    if not features_list:
+        raise ValueError("Не удалось извлечь признаки")
+
+    # Преобразуем в DataFrame
+    features_df = pd.DataFrame(features_list)
+    features_df = features_df.fillna(0.0)
+
+    # Целевая переменная (логарифм для лучшего обучения)
+    y = np.log1p(np.array(targets))
+    X = features_df.values
+
+    # Разделяем на train/val
+    if val_size > 0:
+        X_train, X_val, y_train, y_val = train_test_split(
+            X, y, test_size=val_size, random_state=42
+        )
+    else:
+        X_train, X_val, y_train, y_val = X, np.array([]), y, np.array([])
+
+    print("Обучающие данные подготовлены:")
+    print(f"  Train: {X_train.shape}")
+    print(f"  Validation: {X_val.shape if val_size > 0 else 'None'}")
+
+    return X_train, X_val, y_train, y_val, features_df.columns.tolist()
+
+
+def prepare_test_data(
+    data,
+    train_columns: List[str],
+    target_column: str = 'time'
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Подготавливает тестовые данные
+
+    Args:
+        data: Список словарей с features, target
+        train_columns: Список колонок из обучающих данных
+        target_column: Название колонки с целевой переменной
+
+    Returns:
+        Кортеж (X_test, y_test)
+    """
+    features_list = []
+    targets = []
+    for item in data:
+        try:
+            target = item.get(target_column)
+            features = json.loads(item.get('features'))
+
+            if target is None:
+                continue
+
+            features_list.append(features)
+            targets.append(float(target))
+
+        except Exception as e:
+            print(f"Ошибка обработки элемента: {e}")
+            continue
+
+    if not features_list:
+        raise ValueError("Не удалось извлечь признаки из тестовых данных")
+
+    # Преобразуем в DataFrame
+    features_df = pd.DataFrame(features_list)
+    features_df = features_df.fillna(0.0)
+
+    # Выравниваем колонки с обучающими данными
+    for col in train_columns:
+        if col not in features_df.columns:
+            features_df[col] = 0.0
+
+    features_df = features_df[train_columns]
+
+    # Целевая переменная
+    y = np.log1p(np.array(targets))
+    X = features_df.values
+
+    print("Тестовые данные подготовлены:")
+    print(f"  Test: {X.shape}")
+
+    return X, y
 
 
 def create_scaler(X_train: np.ndarray) -> StandardScaler:
@@ -139,7 +259,9 @@ def get_model_class(model_type: str):
         'Ridge': Ridge,
         'Lasso': Lasso,
         'RandomForest': RandomForestRegressor,
-        'GradientBoosting': GradientBoostingRegressor
+        'GradientBoosting': GradientBoostingRegressor,
+        'XGBoost': XGBRegressor,
+        'CatBoost': CatBoostRegressor
     }
 
     if model_type not in models:
@@ -175,6 +297,20 @@ def get_param_grids() -> Dict[str, List[Dict[str, Any]]]:
             {'n_estimators': 100, 'learning_rate': 0.1, 'max_depth': 3},
             {'n_estimators': 100, 'learning_rate': 0.01, 'max_depth': 3},
             {'n_estimators': 100, 'learning_rate': 0.1, 'max_depth': 5}
+        ],
+        'XGBoost': [
+            {'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.1, 'random_state': 42},
+            {'n_estimators': 100, 'max_depth': 3, 'learning_rate': 0.1, 'random_state': 42},
+            {'n_estimators': 100, 'max_depth': 5, 'learning_rate': 0.1, 'random_state': 42},
+            {'n_estimators': 100, 'max_depth': 3, 'learning_rate': 0.01, 'random_state': 42},
+            {'n_estimators': 200, 'max_depth': 4, 'learning_rate': 0.05, 'random_state': 42}
+        ],
+        'CatBoost': [
+            {'iterations': 50, 'depth': 4, 'learning_rate': 0.1, 'random_seed': 42, 'verbose': 0},
+            {'iterations': 100, 'depth': 4, 'learning_rate': 0.1, 'random_seed': 42, 'verbose': 0},
+            {'iterations': 100, 'depth': 6, 'learning_rate': 0.1, 'random_seed': 42, 'verbose': 0},
+            {'iterations': 100, 'depth': 4, 'learning_rate': 0.01, 'random_seed': 42, 'verbose': 0},
+            {'iterations': 200, 'depth': 5, 'learning_rate': 0.05, 'random_seed': 42, 'verbose': 0}
         ]
     }
 
@@ -210,7 +346,11 @@ def tune_model(
 
     for params in param_grid:
         try:
-            model = model_class(random_state=42, **params)
+            # Для XGBoost и CatBoost параметры уже включают random_state/random_seed
+            if model_type in ['XGBoost', 'CatBoost']:
+                model = model_class(**params)
+            else:
+                model = model_class(random_state=42, **params)
             model.fit(X_train, y_train)
 
             if len(X_val) > 0:
@@ -236,7 +376,13 @@ def tune_model(
 
     if best_model is None:
         # Fallback на дефолтную модель
-        best_model = model_class(random_state=42)
+        if model_type in ['XGBoost', 'CatBoost']:
+            if model_type == 'XGBoost':
+                best_model = model_class(random_state=42)
+            else:  # CatBoost
+                best_model = model_class(random_seed=42, verbose=0)
+        else:
+            best_model = model_class(random_state=42)
         best_model.fit(X_train, y_train)
 
     print(f"Лучшие параметры для {model_type}: {best_params}")
@@ -271,7 +417,13 @@ def train_model(
     else:
         # Если нет валидации, обучаем с дефолтными параметрами
         model_class = get_model_class(model_type)
-        model = model_class(random_state=42)
+        if model_type in ['XGBoost', 'CatBoost']:
+            if model_type == 'XGBoost':
+                model = model_class(random_state=42)
+            else:  # CatBoost
+                model = model_class(random_seed=42, verbose=0)
+        else:
+            model = model_class(random_state=42)
         model.fit(X_train, y_train)
         params = {}
 
@@ -307,14 +459,34 @@ def evaluate_models(
 
             results[model_type] = metrics
 
-            # Печатаем ключевые метрики
-            mae = metrics.get('MAE', 'N/A')
-            q_error_median = metrics.get('Q_Error_Median', 'N/A')
-            print(f"{model_type}: MAE={mae:.4f}, Q-Error Median={q_error_median:.4f}")
-
         except Exception as e:
             print(f"Ошибка оценки {model_type}: {e}")
             results[model_type] = {}
+
+    # Отображаем все метрики в виде таблицы
+    if results:
+        print("\n" + "="*80)
+        print("РЕЗУЛЬТАТЫ ОЦЕНКИ МОДЕЛЕЙ")
+        print("="*80)
+
+        # Создаем DataFrame из результатов
+        df_results = pd.DataFrame.from_dict(results, orient='index')
+
+        # Округляем числовые значения для лучшей читаемости
+        numeric_columns = df_results.select_dtypes(include=[np.number]).columns
+        df_results[numeric_columns] = df_results[numeric_columns].round(4)
+
+        # Выводим таблицу
+        print(df_results.to_string())
+        print("="*80)
+
+        # Также печатаем ключевые метрики для быстрого обзора
+        print("\nКЛЮЧЕВЫЕ МЕТРИКИ:")
+        for model_type, metrics in results.items():
+            mae = metrics.get('MAE', 'N/A')
+            q_error_median = metrics.get('Q_Error_Median', 'N/A')
+            r2 = metrics.get('R2', 'N/A')
+            print(f"{model_type}: MAE={mae}, Q-Error Median={q_error_median}, R²={r2}")
 
     return results
 
@@ -367,29 +539,38 @@ def save_models(
 
 
 def run_training_pipeline(
-    dataset_path: str,
+    train_dataset_path: str,
+    test_dataset_path: str,
+    target_column: str = 'time',
     output_dir: str = "models",
 ) -> Dict[str, Any]:
     """
     Основная функция обучения
 
     Args:
-        dataset_path: Путь к датасету
-        model_types: Список типов моделей
+        train_dataset_path: Путь к обучающему датасету
+        test_dataset_path: Путь к тестовому датасету
+        target_column: Название колонки с целевой переменной
         output_dir: Директория для сохранения
 
     Returns:
         Результаты обучения
     """
-    model_types = ['Ridge', 'Lasso', 'RandomForest', 'GradientBoosting']
+    model_types = ['Ridge', 'Lasso', 'RandomForest', 'GradientBoosting', 'XGBoost', 'CatBoost']
 
     # 1. Загружаем данные
-    print("Загрузка датасета...")
-    data = load_dataset(dataset_path)
+    print("Загрузка обучающего датасета...")
+    train_data = load_dataset(train_dataset_path)
+
+    print("Загрузка тестового датасета...")
+    test_data = load_dataset(test_dataset_path)
 
     # 2. Подготавливаем данные
-    print("Подготовка данных...")
-    X_train, X_val, X_test, y_train, y_val, y_test = prepare_data(data)
+    print("Подготовка обучающих данных...")
+    X_train, X_val, y_train, y_val, train_columns = prepare_train_data(train_data, target_column)
+
+    print("Подготовка тестовых данных...")
+    X_test, y_test = prepare_test_data(test_data, train_columns, target_column)
 
     # 3. Создаем и применяем scaler
     print("Создание scaler...")
@@ -424,13 +605,25 @@ def run_training_pipeline(
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        print("Использование: python ml/train.py <dataset_path>")
+    if len(sys.argv) < 3:
+        print("Использование: python scripts/c_train_models.py <train_dataset_path> <test_dataset_path>")
         sys.exit(1)
 
-    dataset_path = sys.argv[1]
+    train_dataset_path = sys.argv[1]
+    test_dataset_path = sys.argv[2]
+
     # Пример использования
     result = run_training_pipeline(
-        dataset_path=dataset_path
+        train_dataset_path=train_dataset_path,
+        test_dataset_path=test_dataset_path,
+        target_column="time",
+        output_dir="time_models",
+    )
+
+    result = run_training_pipeline(
+        train_dataset_path=train_dataset_path,
+        test_dataset_path=test_dataset_path,
+        target_column="size",
+        output_dir="size_models",
     )
     print("Обучение завершено!")
