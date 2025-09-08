@@ -46,7 +46,7 @@ if __name__ == "__main__":
     import psycopg
     from dotenv import load_dotenv
 
-    from ml.features import get_time_from_plan
+    from ml.features import get_time_from_plan, get_size_from_plan
     from scripts.a_collect_sql_plans import run_explain_analyze_json
 
     # Specify the path to your custom .env file
@@ -70,3 +70,7 @@ if __name__ == "__main__":
     prediction = predict("catboost", "time_models", sql, plan)
     actual_time = get_time_from_plan(plan)
     print(f"actual time: {actual_time}, prediction: {prediction}")
+
+    prediction = predict("catboost", "size_models", sql, plan)
+    actual_size = get_size_from_plan(plan)
+    print(f"actual size: {actual_size}, prediction: {prediction}")

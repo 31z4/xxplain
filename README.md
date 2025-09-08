@@ -48,12 +48,14 @@
 
 ## Обучение моделей
 
+Теперь модели обучаются для предсказания двух метрик: времени выполнения запроса (time) и объема данных (size). Поддерживаются модели: Ridge, Lasso, RandomForest, GradientBoost, XGBoost и CatBoost.
+
 1. Сбор данных
 
     Запустить
 
     ```
-        scripts/a_collect_sql_plans.py`
+    scripts/a_collect_sql_plans.py
     ```
 
     оно соберёт EXPLAIN ANALYZE всё-что-можно-собрать в
@@ -63,7 +65,7 @@
 2. Обогаить датасеты фичами
 
     ```
-    python enrich_dataset.py datasets/train_query_plans.csv > train_dataset.csv
+    python scripts/b_enrich_dataset.py datasets/train_query_plans.csv > train_dataset.csv
     ```
 
 3. Обучить модельки
@@ -78,7 +80,7 @@
     python ml/loader.py benchmarks/tpc-h/queries/q15.sql
     ```
 
-Фичи из планов собираются через 
+Для сравнения метрик моделей см. [Сравнительная таблица метрик](Cравнительная\ таблица\ метрик.md)
 
 ## Фронтенд
 
