@@ -84,7 +84,10 @@
       </button>
     </div>
     <div class="card-body">
-      <pre><code>{{ sql }}</code></pre>
+      <highlightjs
+          language="sql"
+          :code="sql"
+      />
     </div>
   </div>
 </template>
