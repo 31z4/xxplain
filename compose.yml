@@ -31,7 +31,25 @@ services:
       # Для удобства локальной разработки.
       - 127.0.0.1:8000:8000
 
+  caddy:
+    image: caddy:2.10.2
+    restart: always
+    env_file: .env.caddy
+    profiles:
+      - demo
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+
+
 volumes:
   xxplain-postgres-data:
     # Ручное управление созданием и удалением volume.
     external: true
+  caddy-data:
+  caddy-config:

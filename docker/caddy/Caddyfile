@@ -1,0 +1,8 @@
+xxplain.zanko.dev {
+    handle {
+		basicauth {
+			{$DEMO_USER} {$DEMO_PASSWORD}
+		}
+		reverse_proxy app:8000
+	}
+}
