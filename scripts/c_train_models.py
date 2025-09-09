@@ -68,7 +68,7 @@ def prepare_data(
 
 
 def prepare_train_data(
-    data,
+    df,
     target_column: str = 'time',
     val_size: float = 0.1
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[str]]:
@@ -83,32 +83,11 @@ def prepare_train_data(
     Returns:
         Кортеж (X_train, X_val, y_train, y_val)
     """
-    features_list = []
-    targets = []
-    for item in data:
-        try:
-            target = item.get(target_column)
-            features = json.loads(item.get('features'))
-
-            if target is None:
-                continue
-
-            features_list.append(features)
-            targets.append(float(target))
-
-        except Exception as e:
-            print(f"Ошибка обработки элемента: {e}")
-            continue
-
-    if not features_list:
-        raise ValueError("Не удалось извлечь признаки")
-
-    # Преобразуем в DataFrame
-    features_df = pd.DataFrame(features_list)
+    features_df = pd.json_normalize(df['features'].apply(json.loads))
     features_df = features_df.fillna(0.0)
 
     # Целевая переменная (логарифм для лучшего обучения)
-    y = np.log1p(np.array(targets))
+    y = np.log1p(df[target_column])
     X = features_df.values
 
     # Разделяем на train/val
@@ -127,7 +106,7 @@ def prepare_train_data(
 
 
 def prepare_test_data(
-    data,
+    df,
     train_columns: List[str],
     target_column: str = 'time'
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -142,28 +121,7 @@ def prepare_test_data(
     Returns:
         Кортеж (X_test, y_test)
     """
-    features_list = []
-    targets = []
-    for item in data:
-        try:
-            target = item.get(target_column)
-            features = json.loads(item.get('features'))
-
-            if target is None:
-                continue
-
-            features_list.append(features)
-            targets.append(float(target))
-
-        except Exception as e:
-            print(f"Ошибка обработки элемента: {e}")
-            continue
-
-    if not features_list:
-        raise ValueError("Не удалось извлечь признаки из тестовых данных")
-
-    # Преобразуем в DataFrame
-    features_df = pd.DataFrame(features_list)
+    features_df = pd.json_normalize(df['features'].apply(json.loads))
     features_df = features_df.fillna(0.0)
 
     # Выравниваем колонки с обучающими данными
@@ -174,7 +132,7 @@ def prepare_test_data(
     features_df = features_df[train_columns]
 
     # Целевая переменная
-    y = np.log1p(np.array(targets))
+    y = np.log1p(df[target_column])
     X = features_df.values
 
     print("Тестовые данные подготовлены:")
