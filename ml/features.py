@@ -334,12 +334,12 @@ def _extract_from_pg_stat_statement(features, data) -> tuple[float, float]:
 
     return float(stddev_exec_time), float(total_io)
 
-def _extract_tables_info(features, sql, pg_stat_user_tables, pg_indexes):
+def _extract_tables_info(sql, pg_stat_user_tables, pg_indexes) -> Dict[str, float]:
     try:
         query_tree = sqlglot.parse_one(sql)
     except Exception:
-        return
-
+        return {}
+    features = defaultdict(float)
     # Извлекаем все таблицы из SQL-запроса
     tables = []
     for table in query_tree.find_all(exp.Table):
@@ -394,6 +394,7 @@ def _extract_tables_info(features, sql, pg_stat_user_tables, pg_indexes):
     features['n_idx_scans'] = float(total_idx_scan)
     features['index_usage_ratio'] = index_usage_ratio
     features['table_bloat_ratio'] = table_bloat_ratio
+    return features
 
 
 def extract_features(
@@ -401,11 +402,8 @@ def extract_features(
     pg_stat_user_tables: Optional[pd.DataFrame] = None,
     pg_indexes: Optional[pd.DataFrame] = None,
     plan_json: Optional[Union[Dict[str, Any], List[Any]]] = None,
-    plan_analyze: Dict = None,
 ) -> Dict[str, Any]:
     features = defaultdict(float)
-    time = 0.0
-    size = 0
 
     # Extract features from SQL query
     _extract_features_from_sql(features, query)
@@ -414,21 +412,11 @@ def extract_features(
     if plan_json is not None:
         plan_features = extract_features_from_plan(plan_json, query)
         features.update(plan_features)
-        # Get time and size from plan
-        time = get_time_from_plan(plan_analyze)
-        size = get_size_from_plan(plan_analyze)
 
     # Extract features from tables/indexes if available
     if pg_stat_user_tables is not None and pg_indexes is not None:
-        _extract_tables_info(features, query, pg_stat_user_tables, pg_indexes)
-
-    # Return features with time/size if plan was provided
-    if plan_json is not None:
-        return {
-            'features': json.dumps(dict(features)),
-            'time': time,
-            'size': size,
-        }
+        table_statsfeatures = _extract_tables_info(query, pg_stat_user_tables, pg_indexes)
+        features.update(table_statsfeatures)
 
     # If no plan, return features dict
     return dict(features)

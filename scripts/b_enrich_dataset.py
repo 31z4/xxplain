@@ -30,28 +30,29 @@ def enrich(input_file, output_file=sys.stdout):
     conn = get_conn(DSN)
     pg_indexes_df = pd.read_sql('SELECT * FROM pg_indexes', conn)
     pg_stat_user_tables_df = pd.read_sql('SELECT * FROM pg_stat_user_tables', conn)
+    features_list = []
 
     with open(input_file, 'r', newline='', encoding='utf-8') as infile:
         reader = csv.DictReader(infile, delimiter="\t", quoting=csv.QUOTE_NONE, quotechar=None)
-        fieldnames = list(reader.fieldnames or []) + ['features', 'time', 'size']
-
-        writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames, delimiter="\t", quoting=csv.QUOTE_NONE, quotechar=None)
-        writer.writeheader()
-
         for row in reader:
+            sql = row['query']
             plan = json.loads(row['plan'])
             plan_analyze = json.loads(row['plan_analyze'])
-            features = extract_features(row['query'], pg_stat_user_tables_df, pg_indexes_df, plan, plan_analyze)
-            row['features'] = json.dumps(features)
-            # target values
-            plan_analyze = json.loads(row['plan_analyze'])
-            row['time'] = get_time_from_plan(plan_analyze)
-            row['size'] = get_size_from_plan(plan_analyze)
-            writer.writerow(row)
-
+            features = extract_features(sql, pg_stat_user_tables_df, pg_indexes_df, plan)
+            features_list.append({
+                'features': json.dumps(features),
+                # target values
+                'time': get_time_from_plan(plan_analyze),
+                'size': get_size_from_plan(plan_analyze),
+            })
+    features_df = pd.DataFrame(features_list)
+    features_df.to_csv(output_file, index=False)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: enrich_dataset.py datasets/train_query_plans.csv > train_dataset.csv")
+        print("Usage: enrich_dataset.py datasets/train_query_plans.csv > train_features.csv")
         sys.exit(0)
-    enrich(sys.argv[1])
+    if len(sys.argv) == 2:
+        enrich(sys.argv[1])
+    elif len(sys.argv) == 3:
+        enrich(sys.argv[1], sys.argv[2])
