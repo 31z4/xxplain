@@ -17,3 +17,8 @@ docker-compose-validate:
 clean-docker-volumes:
 	docker volume rm -f xxplain-postgres-data
 	docker volume create xxplain-postgres-data
+
+train_models:
+	python scripts/b_enrich_dataset.py datasets/train_query_plans.csv > datasets/train_dataset.csv
+	python scripts/b_enrich_dataset.py datasets/test_query_plans.csv > datasets/test_dataset.csv
+	python scripts/c_train_models.py datasets/train_dataset.csv datasets/test_dataset.csv
