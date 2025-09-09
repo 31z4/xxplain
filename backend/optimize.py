@@ -125,14 +125,14 @@ async def optimize(sql: str) -> dict:
         log.exception("Не валидный запрос в рекомендации")
         return {}
 
-    # Хак: если метрики не изменились, значит с высокой долей вероятности наша
+    # Хак: если стоимость запроса не изменилась, значит с высокой долей вероятности наша
     # рекомендация такая же как и оригинальный запрос.
     # Для прода, тут лучше проверять семантическую эквивалентность запроса.
     # Метод из sqlglot (https://sqlglot.com/sqlglot/diff.html) тут работает плохо.
     # Надо пробовать альтернативные методы, например https://github.com/qed-solver
     prediction = predict(new_sql, new_plan)
-    if prediction == old_prediction:
-        log.warning("Метрики рекомендованного запроса не изменились")
+    if prediction["cost"] == old_prediction["cost"]:
+        log.warning("Стоимость рекомендованного запроса не изменилась")
         return {}
 
     new_sql = sqlparse.format(new_sql, reindent_aligned=True, indent_width=4)
